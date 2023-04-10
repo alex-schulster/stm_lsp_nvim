@@ -8,18 +8,9 @@ local function file_exists(file)
   return f ~= nil
 end
 
--- File paths
-local INPUT_PATH = "Debug/compile_commands.json"
-local OUTPUT_DIR = "build"
-local OUTPUT_FILE = "compile_commands.json"
-local OUTPUT_PATH = OUTPUT_DIR .. "/" .. OUTPUT_FILE
-
 function M.patch_lsp()
     -- Generate the compile_commands.json file with compiledb
-    local command = "cd Debug && make clean > /dev/null && compiledb make -n all > /dev/null && cd .."
-
-    -- Job status flag
-    local job_done = false
+    local command = "cd " .. M.options.input_dir .. " && make clean > /dev/null && compiledb make -n all > /dev/null && cd .."
 
     -- Start job creating compile_commands.json file
     vim.fn.system(command)
@@ -36,7 +27,7 @@ function M.patch_lsp()
     end
 
     -- Try to open generated file
-    if not file_exists(INPUT_PATH) then
+    if not file_exists(M.options.input_path) then
         -- Failed to open, abort
         error("Could not open compile_commands.json file")
         return
@@ -44,18 +35,18 @@ function M.patch_lsp()
 
     -- Get all the lines which do not contain the -fcyclomatic option
     local filtered_text = ""
-    for line in io.lines(INPUT_PATH) do
+    for line in io.lines(M.options.input_path) do
         if not string.find(line, "fcyclomatic") then
             filtered_text = filtered_text .. "\n" .. line
         end
     end
 
     -- Try to open output file
-    local output_file = io.open(OUTPUT_PATH, "w")
+    local output_file = io.open(M.options.output_path, "w")
     if not output_file then
         -- The file or directory doesn't exist yet, so create it
-        os.execute("mkdir -p " .. OUTPUT_DIR)
-        output_file = io.open(OUTPUT_PATH, "w")
+        os.execute("mkdir -p " .. M.options.output_dir)
+        output_file = io.open(M.options.output_path, "w")
     end
 
     -- File is still nil, error during opening / creation
@@ -73,7 +64,41 @@ function M.patch_lsp()
     vim.api.nvim_command("LspRestart")
 end
 
-M.test = "Hello world"
+-- Define default parameters
+local defaults = {
+    input_path = "Debug/compile_commands.json",
+    output_path = "build/compile_commands.json"
+}
+
+-- Define setup function
+function M.setup(options)
+    -- Merge default and provided options
+    options = vim.tbl_deep_extend("force", defaults, options or {})
+
+    -- Define formatted options
+    local options_formatted = {}
+
+    -- Save the provided paths into the module
+    options_formatted.input_path = options.input_path
+    options_formatted.output_path = options.output_path
+
+    -- Slice ouput path provided into output dir and file
+    options_formatted.input_dir = string.match(options.input_path, "^(.*/)")
+    options_formatted.input_file = string.sub(
+    options.input_path,
+    #options_formatted.input_dir + 1
+    )
+
+    -- Do the same for the output
+    options_formatted.output_dir = string.match(options.output_path, "^(.*/)")
+    options_formatted.output_file = string.sub(
+    options.output_path,
+    #options_formatted.output_dir + 1
+    )
+
+    -- Set module's options
+    M.options = options_formatted
+end
 
 -- Return the module object
 return M
