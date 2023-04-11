@@ -36,7 +36,19 @@ function M.patch_lsp()
     -- Get all the lines which do not contain the -fcyclomatic option
     local filtered_text = ""
     for line in io.lines(M.options.input_path) do
-        if not string.find(line, "fcyclomatic") then
+        -- Init exclude line flag to false
+        local exclude = false
+        -- Search every pattern in the line
+        for _, pattern in ipairs(M.options.excludes) do
+            -- If one is true, set exclude flag to true and exit loop
+            if string.find(line, pattern) then
+                exclude = true
+                break
+            end
+        end
+
+        -- If exclude is false, keep line in filtered version
+        if exclude == false then
             filtered_text = filtered_text .. "\n" .. line
         end
     end
@@ -66,8 +78,11 @@ end
 
 -- Define default parameters
 local defaults = {
-    input_path = "Debug/compile_commands.json",
-    output_path = "build/compile_commands.json"
+    input_path = "Debug/compile_commands.json", -- Path to input file
+    output_path = "build/compile_commands.json", -- Path to ouput file
+    excludes = { -- List of patterns to exclude from file
+        "fcyclomatic",
+    },
 }
 
 -- Define setup function
@@ -95,6 +110,9 @@ function M.setup(options)
     options.output_path,
     #options_formatted.output_dir + 1
     )
+
+    -- Add excludes to options
+    options_formatted.excludes = options.excludes
 
     -- Set module's options
     M.options = options_formatted
