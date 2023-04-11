@@ -2,6 +2,8 @@
 Patch [`clangd`](https://clangd.llvm.org/) LSP for STM32CubeIDE projects. Say goodbye to unresolved
 includes and unknown types in your embedded projects.
 
+https://user-images.githubusercontent.com/40316586/231279813-95c792c2-4b98-46e0-979e-d1fa8670d29b.mov
+
 ## ✨ Features
 * Patch STM projects in a single command
 * Get fully working LSP for projects generated on STM32CubeIDE
