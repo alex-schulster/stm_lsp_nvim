@@ -86,10 +86,10 @@ precise locations. This is why we place the modified version in the
 ## 🛠️ Issues and contribution
 
 This is my first public (and, hopefully, useful) repo on GitHub, and also my
-first time writing a plugin for Neovim. So, you may have some issues trying
+first time writing a plugin for Neovim. So you may have some issues trying
 to use it, or find gross mistakes in the code.
 
 * If you have a problem installing / using the plugin, don't hesitate
-to open a GitHub issue. I will to my best to help you.
+to open a GitHub issue. I will do my best to help you.
 * If you have an idea on how to improve the plugin or can think of a way
 to optimise / correct it, please feel free to open a pull request.
